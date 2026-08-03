@@ -40,11 +40,113 @@ void displayMenu() {
         << "4. Record Vital Signs\n"
         << "5. View Patient Vital History\n"
         << "6. View Threshold Configuration\n"
-        << "7. Exit\n"
+        << "7. View Latest Patient Vitals\n"
+        << "8. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
 
+
+// ============================================================
+// PHASE 5.5
+// VALIDATE PHYSICALLY POSSIBLE VITAL-SIGN INPUTS
+//
+// Important:
+// This does NOT decide whether a reading is medically normal.
+// AlertEngine handles normal/warning/critical thresholds.
+//
+// This function only rejects impossible or invalid input.
+// ============================================================
+
+bool validateVitalInput(
+    int heartRate,
+    int spo2,
+    double temperature,
+    int systolicBP,
+    int diastolicBP,
+    int respiratoryRate
+) {
+
+    bool valid = true;
+
+
+    if (heartRate <= 0 || heartRate > 300) {
+
+        std::cout
+            << "\nInvalid Heart Rate."
+            << " Expected range: 1-300 bpm.\n";
+
+        valid = false;
+    }
+
+
+    if (spo2 < 0 || spo2 > 100) {
+
+        std::cout
+            << "\nInvalid SpO2."
+            << " Expected range: 0-100%.\n";
+
+        valid = false;
+    }
+
+
+    if (temperature < 20.0 ||
+        temperature > 50.0) {
+
+        std::cout
+            << "\nInvalid Temperature."
+            << " Expected range: 20-50 C.\n";
+
+        valid = false;
+    }
+
+
+    if (systolicBP <= 0 ||
+        systolicBP > 300) {
+
+        std::cout
+            << "\nInvalid Systolic BP."
+            << " Expected range: 1-300 mmHg.\n";
+
+        valid = false;
+    }
+
+
+    if (diastolicBP <= 0 ||
+        diastolicBP > 200) {
+
+        std::cout
+            << "\nInvalid Diastolic BP."
+            << " Expected range: 1-200 mmHg.\n";
+
+        valid = false;
+    }
+
+
+    if (diastolicBP >= systolicBP) {
+
+        std::cout
+            << "\nInvalid Blood Pressure."
+            << " Diastolic BP must be lower"
+            << " than Systolic BP.\n";
+
+        valid = false;
+    }
+
+
+    if (respiratoryRate <= 0 ||
+        respiratoryRate > 100) {
+
+        std::cout
+            << "\nInvalid Respiratory Rate."
+            << " Expected range: 1-100 breaths/min.\n";
+
+        valid = false;
+    }
+
+
+    return valid;
+}
 
 // ============================================================
 // MAIN
@@ -552,6 +654,27 @@ int main() {
                 break;
             }
 
+            
+            // --------------------------------------------------------
+            // PHASE 5.5
+            // Validate input before storing or evaluating it
+            // --------------------------------------------------------
+
+            if (!validateVitalInput(
+                    heartRate,
+                    spo2,
+                    temperature,
+                    systolicBP,
+                    diastolicBP,
+                    respiratoryRate
+                )) {
+
+                std::cout
+                    << "\nVital reading rejected."
+                    << " Nothing was stored.\n";
+
+                break;
+            }
 
             // =================================================
             // STORE NEW READING IN MEMORY
@@ -753,13 +876,90 @@ int main() {
             break;
         }
 
+        // ========================================================
+        // CASE 7
+        // VIEW LATEST VITAL READING FOR A PATIENT
+        //
+        // Phase 5.4:
+        // Uses hash-based patient-specific latest-reading lookup.
+        // ========================================================
+
+        case 7: {
+
+            int patientId;
+
+
+            std::cout
+                << "\n=========================================\n"
+                << "       LATEST PATIENT VITALS\n"
+                << "=========================================\n"
+                << "Enter Patient ID: ";
+
+
+            std::cin >> patientId;
+
+
+            // ----------------------------------------------------
+            // Validate that patient exists
+            // ----------------------------------------------------
+
+            Patient* patient =
+                patientManager.searchPatient(patientId);
+
+
+            if (patient == nullptr) {
+
+                std::cout
+                    << "\nPatient not found.\n";
+
+                break;
+            }
+
+
+            std::cout
+                << "\nPatient: "
+                << patient->getName()
+                << "\n";
+
+
+            // ----------------------------------------------------
+            // PHASE 5.4
+            // Average O(1) latest-reading lookup
+            // ----------------------------------------------------
+
+            const VitalSigns* latest =
+                vitalManager.getLatestReadingForPatient(
+                    patientId
+                );
+
+
+            if (latest == nullptr) {
+
+                std::cout
+                    << "\nNo vital readings found for Patient ID: "
+                    << patientId
+                    << "\n";
+
+                break;
+            }
+
+
+            std::cout
+                << "\nLatest vital reading:\n";
+
+
+            latest->display();
+
+
+            break;
+        }
 
         // ====================================================
         // OPTION 7
         // EXIT
         // ====================================================
 
-        case 7: {
+        case 8: {
 
             std::cout
                 << "\n=========================================\n"
@@ -782,7 +982,7 @@ int main() {
 
             std::cout
                 << "\nInvalid choice. "
-                << "Please select between 1 and 7.\n";
+                << "Please select between 1 and 8.\n";
 
             break;
         }

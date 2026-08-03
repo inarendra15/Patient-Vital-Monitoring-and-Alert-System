@@ -5,13 +5,26 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 
 class PatientManager {
 
 private:
 
+    // Primary patient storage
     std::vector<Patient> patients;
+
+
+    // ========================================================
+    // PHASE 5
+    // HASH-BASED PATIENT INDEX
+    //
+    // patientId -> position inside patients vector
+    // ========================================================
+
+    std::unordered_map<int, std::size_t> patientIndex;
+
 
     int nextPatientId;
 
@@ -28,6 +41,7 @@ public:
     );
 
 
+    // Average O(1) lookup using unordered_map
     Patient* searchPatient(
         int patientId
     );
@@ -42,7 +56,7 @@ public:
     const Patient* getLatestPatient() const;
 
 
-    // Phase 4.2
+    // Load patient from persistent storage
     void loadPatient(
         const Patient& patient
     );

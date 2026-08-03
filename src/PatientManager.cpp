@@ -4,18 +4,19 @@
 #include <iomanip>
 
 
-// --------------------------------------------
-// Constructor
-// --------------------------------------------
+// ============================================================
+// CONSTRUCTOR
+// ============================================================
 
 PatientManager::PatientManager()
     : nextPatientId(1001) {
+
 }
 
 
-// --------------------------------------------
-// Add a new patient
-// --------------------------------------------
+// ============================================================
+// ADD / REGISTER NEW PATIENT
+// ============================================================
 
 void PatientManager::addPatient(
     const std::string& name,
@@ -23,27 +24,7 @@ void PatientManager::addPatient(
     const std::string& gender
 ) {
 
-    // Validate name
-    if (name.empty()) {
-        std::cout << "Error: Patient name cannot be empty.\n";
-        return;
-    }
-
-    // Validate age
-    if (age <= 0 || age > 120) {
-        std::cout << "Error: Invalid patient age.\n";
-        return;
-    }
-
-    // Validate gender
-    if (gender.empty()) {
-        std::cout << "Error: Gender cannot be empty.\n";
-        return;
-    }
-
-
-    // Create a new Patient object
-    Patient newPatient(
+    Patient patient(
         nextPatientId,
         name,
         age,
@@ -51,8 +32,19 @@ void PatientManager::addPatient(
     );
 
 
-    // Store patient inside vector
-    patients.push_back(newPatient);
+    // Add patient to primary storage
+    patients.push_back(patient);
+
+
+    // ========================================================
+    // PHASE 5
+    // Build hash index:
+    //
+    // Patient ID -> vector position
+    // ========================================================
+
+    patientIndex[nextPatientId] =
+        patients.size() - 1;
 
 
     std::cout
@@ -62,40 +54,45 @@ void PatientManager::addPatient(
         << "\n";
 
 
-    // Generate next unique ID
     nextPatientId++;
 }
 
 
-// --------------------------------------------
-// Search patient by ID
-// --------------------------------------------
+// ============================================================
+// SEARCH PATIENT
+// PHASE 5: Average O(1) hash-table lookup
+// ============================================================
 
-Patient* PatientManager::searchPatient(int patientId) {
+Patient* PatientManager::searchPatient(
+    int patientId
+) {
 
-    // Traverse all patients
-    for (Patient& patient : patients) {
+    auto it =
+        patientIndex.find(patientId);
 
-        // Check whether ID matches
-        if (patient.getPatientId() == patientId) {
 
-            // Return address of matching patient
-            return &patient;
-        }
+    // Patient ID does not exist
+    if (it == patientIndex.end()) {
+
+        return nullptr;
     }
 
-    // Patient not found
-    return nullptr;
+
+    // Retrieve vector position from hash table
+    std::size_t index =
+        it->second;
+
+
+    return &patients[index];
 }
 
 
-// --------------------------------------------
-// Display all registered patients
-// --------------------------------------------
+// ============================================================
+// DISPLAY ALL PATIENTS
+// ============================================================
 
 void PatientManager::displayAllPatients() const {
 
-    // Check whether vector is empty
     if (patients.empty()) {
 
         std::cout
@@ -105,23 +102,20 @@ void PatientManager::displayAllPatients() const {
     }
 
 
-    // Table heading
-    std::cout << "\n";
-
     std::cout
+        << "\n"
         << std::left
         << std::setw(12) << "ID"
         << std::setw(25) << "Name"
         << std::setw(10) << "Age"
         << std::setw(15) << "Gender"
-        << '\n';
+        << "\n";
 
 
     std::cout
         << "----------------------------------------------------------\n";
 
 
-    // Display each patient
     for (const Patient& patient : patients) {
 
         patient.display();
@@ -129,51 +123,72 @@ void PatientManager::displayAllPatients() const {
 }
 
 
-// --------------------------------------------
-// Return total number of patients
-// --------------------------------------------
+// ============================================================
+// GET NUMBER OF PATIENTS
+// ============================================================
 
 int PatientManager::getPatientCount() const {
 
-    return static_cast<int>(patients.size());
+    return static_cast<int>(
+        patients.size()
+    );
 }
+
+
 // ============================================================
-// GET LATEST REGISTERED PATIENT
+// GET MOST RECENTLY ADDED PATIENT
 // ============================================================
 
-const Patient* PatientManager::getLatestPatient() const {
+const Patient*
+PatientManager::getLatestPatient() const {
 
     if (patients.empty()) {
 
         return nullptr;
     }
 
+
     return &patients.back();
 }
 
+
 // ============================================================
 // LOAD PATIENT FROM PERSISTENT STORAGE
+//
+// PHASE 4: Restore patient from file
+// PHASE 5: Rebuild hash index
 // ============================================================
 
 void PatientManager::loadPatient(
     const Patient& patient
 ) {
 
+    // Add restored patient to vector
     patients.push_back(patient);
 
 
-    // --------------------------------------------------------
-    // Maintain ID continuity
+    // ========================================================
+    // PHASE 5
+    // Reconstruct hash index
+    //
+    // Patient ID -> vector position
+    // ========================================================
+
+    patientIndex[patient.getPatientId()] =
+        patients.size() - 1;
+
+
+    // ========================================================
+    // Restore correct next patient ID
     //
     // Example:
     //
-    // Saved patients:
+    // File contains:
     // 1001
     // 1002
-    // 1003
     //
-    // nextPatientId must become 1004
-    // --------------------------------------------------------
+    // nextPatientId becomes 1003
+    // ========================================================
 
     if (patient.getPatientId() >= nextPatientId) {
 
