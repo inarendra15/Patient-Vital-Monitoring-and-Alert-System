@@ -194,5 +194,16 @@ void PatientManager::loadPatient(
 
         nextPatientId =
             patient.getPatientId() + 1;
-    }
+    }    
+}
+
+// ============================================================
+// PHASE 6.2
+// RETURN ALL REGISTERED PATIENTS
+// ============================================================
+
+const std::vector<Patient>&
+PatientManager::getPatients() const
+{
+    return patients;
 }

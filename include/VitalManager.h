@@ -105,6 +105,13 @@ public:
     void loadVitalSigns(
         const VitalSigns& vital
     );
+
+        // ===============================
+    // Phase 6
+    // Return complete vital history
+    // ===============================
+    const std::vector<VitalSigns>&
+    getAllVitalHistory() const;
 };
 
 

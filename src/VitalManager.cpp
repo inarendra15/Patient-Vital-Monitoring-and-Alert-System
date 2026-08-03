@@ -267,3 +267,13 @@ void VitalManager::loadVitalSigns(
         vital.getPatientId()
     ].push_back(index);
 }
+
+// ============================================================
+// RETURN COMPLETE VITAL HISTORY
+// ============================================================
+
+const std::vector<VitalSigns>&
+VitalManager::getAllVitalHistory() const {
+
+    return vitalHistory;
+}

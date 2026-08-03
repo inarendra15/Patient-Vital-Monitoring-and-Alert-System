@@ -2,6 +2,7 @@
 #include "../include/VitalManager.h"
 #include "../include/AlertEngine.h"
 #include "../include/FileManager.h"
+#include "../include/AnalyticsManager.h"
 
 #include <iostream>
 #include <limits>
@@ -41,7 +42,8 @@ void displayMenu() {
         << "5. View Patient Vital History\n"
         << "6. View Threshold Configuration\n"
         << "7. View Latest Patient Vitals\n"
-        << "8. Exit\n"
+        << "8. Patient Analytics Dashboard\n"
+        << "9. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
@@ -161,6 +163,10 @@ int main() {
     PatientManager patientManager;
 
     VitalManager vitalManager;
+
+    AnalyticsManager analyticsManager(
+    vitalManager,
+    patientManager);
 
     AlertEngine alertEngine;
 
@@ -954,12 +960,24 @@ int main() {
             break;
         }
 
+        // ========================================================
+        // OPTION 8
+        // PATIENT HEALTH DASHBOARD
+        // ========================================================
+
+        case 8:
+        {
+            analyticsManager.displayPatientDashboard();
+
+            break;
+        }
+
         // ====================================================
-        // OPTION 7
+        // OPTION 9
         // EXIT
         // ====================================================
 
-        case 8: {
+        case 9: {
 
             std::cout
                 << "\n=========================================\n"
@@ -982,7 +1000,7 @@ int main() {
 
             std::cout
                 << "\nInvalid choice. "
-                << "Please select between 1 and 8.\n";
+                << "Please select between 1 and 9.\n";
 
             break;
         }
