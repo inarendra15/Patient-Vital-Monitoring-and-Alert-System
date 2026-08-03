@@ -3,6 +3,7 @@
 #include "../include/AlertEngine.h"
 #include "../include/FileManager.h"
 #include "../include/AnalyticsManager.h"
+#include "../include/PriorityManager.h"
 
 #include <iostream>
 #include <limits>
@@ -43,7 +44,8 @@ void displayMenu() {
         << "6. View Threshold Configuration\n"
         << "7. View Latest Patient Vitals\n"
         << "8. Patient Analytics Dashboard\n"
-        << "9. Exit\n"
+        << "9. Critical Patient Queue\n"
+        << "10. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
@@ -167,6 +169,10 @@ int main() {
     AnalyticsManager analyticsManager(
     vitalManager,
     patientManager);
+
+    PriorityManager priorityManager(
+    patientManager,
+    vitalManager);
 
     AlertEngine alertEngine;
 
@@ -972,12 +978,23 @@ int main() {
             break;
         }
 
+        // =====================================================
+        // PHASE 7
+        // CRITICAL PATIENT QUEUE
+        // =====================================================
+
+        case 9:
+
+            priorityManager.displayCriticalPatients();
+
+            break;
+
         // ====================================================
         // OPTION 9
         // EXIT
         // ====================================================
 
-        case 9: {
+        case 10: {
 
             std::cout
                 << "\n=========================================\n"
@@ -1000,7 +1017,7 @@ int main() {
 
             std::cout
                 << "\nInvalid choice. "
-                << "Please select between 1 and 9.\n";
+                << "Please select between 1 and 10.\n";
 
             break;
         }
