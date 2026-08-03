@@ -2,56 +2,101 @@
 #define PATIENT_MANAGER_H
 
 #include "Patient.h"
+
+#include <vector>
+#include <string>
 #include <unordered_map>
 #include <cstddef>
-#include <string>
-#include <vector>
 
 class PatientManager {
 
 private:
 
+    // ========================================================
+    // PRIMARY STORAGE
+    // ========================================================
+
     std::vector<Patient> patients;
-    std::unordered_map<int, std::size_t> patientIndex;
+
+    // ========================================================
+    // HASH TABLE
+    // Patient ID -> index in patients vector
+    // ========================================================
+
+    std::unordered_map<
+        int,
+        std::size_t
+    > patientIndex;
+
+    // ========================================================
+    // AUTO PATIENT ID GENERATOR
+    // ========================================================
+
     int nextPatientId;
 
 public:
 
-    // Constructor
+    // ========================================================
+    // CONSTRUCTOR
+    // ========================================================
+
     PatientManager();
 
-    // Register a new patient
+    // ========================================================
+    // REGISTER PATIENT
+    // ========================================================
+
     void addPatient(
         const std::string& name,
         int age,
         const std::string& gender
     );
 
-    // Search patient by ID
+    // ========================================================
+    // SEARCH PATIENT
+    // ========================================================
+
     Patient* searchPatient(
         int patientId
     );
 
-    // Display all registered patients
+    // Read-only overload
+    const Patient* searchPatient(
+        int patientId
+    ) const;
+
+    // ========================================================
+    // DISPLAY ALL PATIENTS
+    // ========================================================
+
     void displayAllPatients() const;
 
-    // Total patient count
+    // ========================================================
+    // GET PATIENT COUNT
+    // ========================================================
+
     int getPatientCount() const;
 
-    // Return latest registered patient
+    // ========================================================
+    // GET LATEST REGISTERED PATIENT
+    // ========================================================
+
     const Patient* getLatestPatient() const;
 
-    // Load patient from persistent storage
+    // ========================================================
+    // LOAD PATIENT FROM FILE
+    // ========================================================
+
     void loadPatient(
         const Patient& patient
     );
 
-    // =====================================================
-    // PHASE 6.2
-    // Return all patients (Read-only)
-    // Used by AnalyticsManager
-    // =====================================================
-    const std::vector<Patient>& getPatients() const;
+    // ========================================================
+    // RETURN ALL REGISTERED PATIENTS
+    // ========================================================
+
+    const std::vector<Patient>&
+    getPatients() const;
 };
 
 #endif

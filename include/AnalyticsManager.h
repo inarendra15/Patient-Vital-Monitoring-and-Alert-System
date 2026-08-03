@@ -23,11 +23,12 @@ public:
     // Overall hospital analytics
     void displayDashboard() const;
 
-    // NEW
+    // Patient dashboard
     void displayPatientDashboard() const;
 
-private:
-
+    // ===============================
+    // ReportManager helper functions
+    // ===============================
     int calculateHealthScore(
         const VitalSigns& vital
     ) const;
@@ -35,6 +36,7 @@ private:
     std::string calculateStatus(
         int score
     ) const;
+
 };
 
 #endif

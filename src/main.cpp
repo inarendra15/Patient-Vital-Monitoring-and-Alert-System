@@ -6,6 +6,7 @@
 #include "../include/PriorityManager.h"
 #include "../include/EmergencyManager.h"
 #include "../include/EmergencyStatistics.h"
+#include "../include/ReportManager.h"
 
 #include <iostream>
 #include <limits>
@@ -46,9 +47,10 @@ void displayMenu() {
         << "6. View Threshold Configuration\n"
         << "7. View Latest Patient Vitals\n"
         << "8. Patient Analytics Dashboard\n"
-        << "9. Critical Patient Priority Queue\n"
+        << "9. Critical Patient Queue\n"
         << "10. Emergency Statistics\n"
-        << "11. Exit\n"
+        << "11. Generate Patient Report\n"
+        << "12. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
@@ -184,6 +186,16 @@ int main() {
     FileManager fileManager;
 
     EmergencyStatistics emergencyStatistics;
+
+    ReportManager reportManager(
+
+    patientManager,
+
+    vitalManager,
+
+    analyticsManager,
+
+    emergencyManager);
 
 
     // ========================================================
@@ -1035,10 +1047,36 @@ int main() {
 
         // ====================================================
         // OPTION 11
-        // EXIT
+        // GENERATE PATIENT REPORT
         // ====================================================
 
         case 11: {
+
+            int patientId;
+
+            std::cout
+                << "\n=========================================\n"
+                << "        GENERATE PATIENT REPORT\n"
+                << "=========================================\n";
+
+            std::cout
+                << "Enter Patient ID: ";
+
+            std::cin >> patientId;
+
+            reportManager.generatePatientReport(
+                patientId
+            );
+
+            break;
+        }
+
+        // ====================================================
+        // OPTION 11
+        // EXIT
+        // ====================================================
+
+        case 12: {
 
             std::cout
                 << "\n=========================================\n"
@@ -1061,7 +1099,7 @@ int main() {
 
             std::cout
                 << "\nInvalid choice. "
-                << "Please select between 1 and 11.\n";
+                << "Please select between 1 and 12.\n";
 
             break;
         }

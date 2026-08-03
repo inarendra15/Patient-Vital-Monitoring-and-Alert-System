@@ -3,27 +3,26 @@
 #include <iostream>
 #include <iomanip>
 
-
 // ============================================================
 // CONSTRUCTOR
 // ============================================================
 
 PatientManager::PatientManager()
-    : nextPatientId(1001) {
+    : nextPatientId(1001)
+{
 
 }
 
-
 // ============================================================
-// ADD / REGISTER NEW PATIENT
+// ADD PATIENT
 // ============================================================
 
 void PatientManager::addPatient(
     const std::string& name,
     int age,
     const std::string& gender
-) {
-
+)
+{
     Patient patient(
         nextPatientId,
         name,
@@ -31,21 +30,10 @@ void PatientManager::addPatient(
         gender
     );
 
-
-    // Add patient to primary storage
     patients.push_back(patient);
-
-
-    // ========================================================
-    // PHASE 5
-    // Build hash index:
-    //
-    // Patient ID -> vector position
-    // ========================================================
 
     patientIndex[nextPatientId] =
         patients.size() - 1;
-
 
     std::cout
         << "\nPatient registered successfully.\n"
@@ -53,46 +41,53 @@ void PatientManager::addPatient(
         << nextPatientId
         << "\n";
 
-
     nextPatientId++;
 }
 
-
 // ============================================================
 // SEARCH PATIENT
-// PHASE 5: Average O(1) hash-table lookup
 // ============================================================
 
 Patient* PatientManager::searchPatient(
     int patientId
-) {
-
+)
+{
     auto it =
         patientIndex.find(patientId);
 
-
-    // Patient ID does not exist
     if (it == patientIndex.end()) {
 
         return nullptr;
     }
 
-
-    // Retrieve vector position from hash table
-    std::size_t index =
-        it->second;
-
-
-    return &patients[index];
+    return &patients[it->second];
 }
 
+// ============================================================
+// CONST SEARCH PATIENT
+// ============================================================
+
+const Patient* PatientManager::searchPatient(
+    int patientId
+) const
+{
+    auto it =
+        patientIndex.find(patientId);
+
+    if (it == patientIndex.end()) {
+
+        return nullptr;
+    }
+
+    return &patients[it->second];
+}
 
 // ============================================================
 // DISPLAY ALL PATIENTS
 // ============================================================
 
-void PatientManager::displayAllPatients() const {
-
+void PatientManager::displayAllPatients() const
+{
     if (patients.empty()) {
 
         std::cout
@@ -100,7 +95,6 @@ void PatientManager::displayAllPatients() const {
 
         return;
     }
-
 
     std::cout
         << "\n"
@@ -111,10 +105,8 @@ void PatientManager::displayAllPatients() const {
         << std::setw(15) << "Gender"
         << "\n";
 
-
     std::cout
         << "----------------------------------------------------------\n";
-
 
     for (const Patient& patient : patients) {
 
@@ -122,84 +114,55 @@ void PatientManager::displayAllPatients() const {
     }
 }
 
-
 // ============================================================
-// GET NUMBER OF PATIENTS
+// GET PATIENT COUNT
 // ============================================================
 
-int PatientManager::getPatientCount() const {
-
+int PatientManager::getPatientCount() const
+{
     return static_cast<int>(
         patients.size()
     );
 }
 
-
 // ============================================================
-// GET MOST RECENTLY ADDED PATIENT
+// GET LATEST REGISTERED PATIENT
 // ============================================================
 
 const Patient*
-PatientManager::getLatestPatient() const {
-
+PatientManager::getLatestPatient() const
+{
     if (patients.empty()) {
 
         return nullptr;
     }
 
-
     return &patients.back();
 }
 
-
 // ============================================================
-// LOAD PATIENT FROM PERSISTENT STORAGE
-//
-// PHASE 4: Restore patient from file
-// PHASE 5: Rebuild hash index
+// LOAD PATIENT
 // ============================================================
 
 void PatientManager::loadPatient(
     const Patient& patient
-) {
-
-    // Add restored patient to vector
+)
+{
     patients.push_back(patient);
 
-
-    // ========================================================
-    // PHASE 5
-    // Reconstruct hash index
-    //
-    // Patient ID -> vector position
-    // ========================================================
-
-    patientIndex[patient.getPatientId()] =
-        patients.size() - 1;
-
-
-    // ========================================================
-    // Restore correct next patient ID
-    //
-    // Example:
-    //
-    // File contains:
-    // 1001
-    // 1002
-    //
-    // nextPatientId becomes 1003
-    // ========================================================
+    patientIndex[
+        patient.getPatientId()
+    ] = patients.size() - 1;
 
     if (patient.getPatientId() >= nextPatientId) {
 
         nextPatientId =
             patient.getPatientId() + 1;
-    }    
+    }
 }
 
 // ============================================================
-// PHASE 6.2
-// RETURN ALL REGISTERED PATIENTS
+// RETURN ALL PATIENTS
 // ============================================================
 
 const std::vector<Patient>&

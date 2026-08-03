@@ -1,0 +1,29 @@
+====================================================
+      PATIENT VITAL MONITORING REPORT
+====================================================
+
+Patient Information
+--------------------
+ID      : 1001
+Name    : Narendra
+Age     : 25
+Gender  : Male
+
+--------------------------------------------
+LATEST VITALS
+--------------------------------------------
+Heart Rate         : 145 bpm
+SpO2               : 85 %
+Temperature        : 40 C
+Blood Pressure     : 190/125 mmHg
+Respiratory Rate   : 35 breaths/min
+Timestamp          : 2026-08-03 12:40:52
+
+--------------------------------------------
+HEALTH ANALYSIS
+--------------------------------------------
+Health Score : 0
+Status       : CRITICAL
+
+Report Generated Successfully
+====================================================
