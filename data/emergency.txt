@@ -1,0 +1,11 @@
+=========================================
+Timestamp : 2026-08-04 00:06:30
+Patient ID : 1003
+Patient Name : Raj
+Emergency Level : GREEN
+
+Recommended Actions
+----------------------------
+- Continue routine monitoring.
+=========================================
+

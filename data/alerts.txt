@@ -8,3 +8,9 @@
 1002|2026-08-03 13:46:16|CRITICAL|Systolic BP|22|Systolic BP crossed critical threshold.
 1002|2026-08-03 13:46:16|CRITICAL|Diastolic BP|130|Diastolic BP crossed critical threshold.
 1002|2026-08-03 13:46:16|CRITICAL|Respiratory Rate|75|Respiratory rate crossed critical threshold.
+1002|2026-08-04 00:07:22|CRITICAL|Heart Rate|150|Heart rate crossed critical threshold.
+1002|2026-08-04 00:07:22|CRITICAL|SpO2|80|SpO2 crossed critical threshold.
+1002|2026-08-04 00:07:22|CRITICAL|Temperature|40|Temperature crossed critical threshold.
+1002|2026-08-04 00:07:22|CRITICAL|Systolic BP|190|Systolic BP crossed critical threshold.
+1002|2026-08-04 00:07:22|WARNING|Diastolic BP|120|Diastolic BP crossed warning threshold.
+1002|2026-08-04 00:07:22|CRITICAL|Respiratory Rate|35|Respiratory rate crossed critical threshold.

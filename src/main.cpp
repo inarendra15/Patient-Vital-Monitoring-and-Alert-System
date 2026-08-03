@@ -4,6 +4,8 @@
 #include "../include/FileManager.h"
 #include "../include/AnalyticsManager.h"
 #include "../include/PriorityManager.h"
+#include "../include/EmergencyManager.h"
+#include "../include/EmergencyStatistics.h"
 
 #include <iostream>
 #include <limits>
@@ -44,8 +46,9 @@ void displayMenu() {
         << "6. View Threshold Configuration\n"
         << "7. View Latest Patient Vitals\n"
         << "8. Patient Analytics Dashboard\n"
-        << "9. Critical Patient Queue\n"
-        << "10. Exit\n"
+        << "9. Critical Patient Priority Queue\n"
+        << "10. Emergency Statistics\n"
+        << "11. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
@@ -174,9 +177,13 @@ int main() {
     patientManager,
     vitalManager);
 
+    EmergencyManager emergencyManager;
+
     AlertEngine alertEngine;
 
     FileManager fileManager;
+
+    EmergencyStatistics emergencyStatistics;
 
 
     // ========================================================
@@ -771,6 +778,18 @@ int main() {
                     << "=========================================\n"
                     << "All monitored vital signs are within "
                     << "configured thresholds.\n";
+
+                    emergencyManager.displayEmergencyReport(
+
+                    *patient,
+
+                    *latestReading);
+
+                    emergencyManager.saveEmergencyReport(
+
+                    *patient,
+
+                    *latestReading);
             }
 
 
@@ -811,6 +830,19 @@ int main() {
 
                 std::cout
                     << "\nAbnormal event(s) logged to file.\n";
+
+            // =========================================================
+            // PHASE 8
+            // EMERGENCY RESPONSE ENGINE
+            // =========================================================
+
+            emergencyManager.displayEmergencyReport(
+
+                *patient,
+
+                *latestReading
+
+            );
             }
 
 
@@ -979,7 +1011,7 @@ int main() {
         }
 
         // =====================================================
-        // PHASE 7
+        // PHASE 9
         // CRITICAL PATIENT QUEUE
         // =====================================================
 
@@ -990,11 +1022,23 @@ int main() {
             break;
 
         // ====================================================
-        // OPTION 9
-        // EXIT
+        // OPTION 10
+        // EMERGENCY STATISTICS
         // ====================================================
 
         case 10: {
+
+            emergencyStatistics.displayStatistics();
+
+            break;
+        }
+
+        // ====================================================
+        // OPTION 11
+        // EXIT
+        // ====================================================
+
+        case 11: {
 
             std::cout
                 << "\n=========================================\n"
@@ -1017,7 +1061,7 @@ int main() {
 
             std::cout
                 << "\nInvalid choice. "
-                << "Please select between 1 and 10.\n";
+                << "Please select between 1 and 11.\n";
 
             break;
         }
