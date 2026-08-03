@@ -189,3 +189,18 @@ int VitalManager::getTotalReadings() const {
         vitalRecords.size()
     );
 }
+
+// ============================================================
+// GET LATEST VITAL READING
+// ============================================================
+
+const VitalSigns* VitalManager::getLatestReading() const {
+
+    if (vitalRecords.empty()) {
+
+        return nullptr;
+    }
+
+
+    return &vitalRecords.back();
+}

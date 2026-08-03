@@ -1,5 +1,6 @@
 #include "../include/PatientManager.h"
 #include "../include/VitalManager.h"
+#include "../include/AlertEngine.h"
 
 #include <iostream>
 #include <limits>
@@ -21,7 +22,8 @@ void displayMenu() {
         << "3. Display All Patients\n"
         << "4. Record Vital Signs\n"
         << "5. View Patient Vital History\n"
-        << "6. Exit\n"
+        << "6. View Threshold Configuration\n"
+        << "7. Exit\n"
         << "=========================================\n"
         << "Enter choice: ";
 }
@@ -38,8 +40,8 @@ int main() {
     // --------------------------------------------------------
 
     PatientManager patientManager;
-
     VitalManager vitalManager;
+    AlertEngine alertEngine;
 
 
     int choice;
@@ -457,18 +459,77 @@ int main() {
             // Store Vital Reading
             // ------------------------------------------------
 
+            bool recorded =
             vitalManager.recordVitals(
-                patientId,
-                heartRate,
-                spo2,
-                temperature,
-                systolicBP,
-                diastolicBP,
-                respiratoryRate
+            patientId,
+            heartRate,
+            spo2,
+            temperature,
+            systolicBP,
+            diastolicBP,
+            respiratoryRate
+        );
+
+
+        if (!recorded) {
+
+            break;
+        }
+
+
+        // ============================================================
+        // GET THE NEWLY STORED READING
+        // ============================================================
+
+        const VitalSigns* latestReading =
+            vitalManager.getLatestReading();
+
+
+        if (latestReading == nullptr) {
+
+            std::cout
+                << "\nError: Unable to retrieve vital reading.\n";
+
+            break;
+        }
+    
+
+
+        // ============================================================
+        // RUN RULE-BASED ALERT ENGINE
+        // ============================================================
+
+        std::vector<Alert> alerts =
+            alertEngine.evaluate(
+                *latestReading
             );
 
 
-            break;
+        // ============================================================
+        // DISPLAY RESULT
+        // ============================================================
+
+        if (alerts.empty()) {
+
+            std::cout
+                << "\n[STATUS: NORMAL]\n"
+                << "All monitored vital signs are within "
+                << "configured thresholds.\n";
+
+        } else {
+
+            std::cout
+                << "\n=========================================\n"
+                << "             ALERTS GENERATED\n"
+                << "=========================================\n";
+
+
+            for (const Alert& alert : alerts) {
+
+                alert.display();
+            }
+        }
+        break;
         }
 
 
@@ -539,12 +600,21 @@ int main() {
             break;
         }
 
+        //-----------------------------------
+        //Alert engine
+        //-------------------------------------
+        case 6: {
+
+            alertEngine.displayThresholds();
+
+            break;
+        }
 
         // ====================================================
         // 6. EXIT
         // ====================================================
 
-        case 6: {
+        case 7: {
 
             std::cout
                 << "\nExiting Patient Monitoring System...\n";
@@ -560,7 +630,7 @@ int main() {
         default: {
 
             std::cout
-                << "\nInvalid choice. Please select between 1 and 6.\n";
+                << "\nInvalid choice. Please select between 1 and 7.\n";
 
             break;
         }

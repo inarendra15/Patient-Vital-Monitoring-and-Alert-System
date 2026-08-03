@@ -34,6 +34,7 @@ public:
     // Number of readings in the system
     int getTotalReadings() const;
 
+    const VitalSigns* getLatestReading() const;
 
 private:
 
