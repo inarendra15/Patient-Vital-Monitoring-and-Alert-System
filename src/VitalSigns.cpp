@@ -1,13 +1,13 @@
 #include "../include/VitalSigns.h"
 
 #include <iostream>
-#include <iomanip>
 #include <ctime>
+#include <iomanip>
 #include <sstream>
 
 
 // ============================================================
-// CONSTRUCTOR
+// CONSTRUCTOR FOR NEW VITAL READING
 // ============================================================
 
 VitalSigns::VitalSigns(
@@ -27,6 +27,38 @@ VitalSigns::VitalSigns(
       diastolicBP(diastolicBP),
       respiratoryRate(respiratoryRate),
       timestamp(generateTimestamp()) {
+
+}
+
+
+// ============================================================
+// PHASE 4.2
+// CONSTRUCTOR FOR LOADING SAVED VITAL READING
+//
+// Unlike the constructor above, this constructor does NOT
+// generate a new timestamp. It restores the timestamp that
+// was previously saved in vitals.txt.
+// ============================================================
+
+VitalSigns::VitalSigns(
+    int patientId,
+    int heartRate,
+    int spo2,
+    double temperature,
+    int systolicBP,
+    int diastolicBP,
+    int respiratoryRate,
+    const std::string& timestamp
+)
+    : patientId(patientId),
+      heartRate(heartRate),
+      spo2(spo2),
+      temperature(temperature),
+      systolicBP(systolicBP),
+      diastolicBP(diastolicBP),
+      respiratoryRate(respiratoryRate),
+      timestamp(timestamp) {
+
 }
 
 
@@ -71,7 +103,7 @@ double VitalSigns::getTemperature() const {
 
 
 // ============================================================
-// GET SYSTOLIC BLOOD PRESSURE
+// GET SYSTOLIC BP
 // ============================================================
 
 int VitalSigns::getSystolicBP() const {
@@ -81,7 +113,7 @@ int VitalSigns::getSystolicBP() const {
 
 
 // ============================================================
-// GET DIASTOLIC BLOOD PRESSURE
+// GET DIASTOLIC BP
 // ============================================================
 
 int VitalSigns::getDiastolicBP() const {
@@ -116,92 +148,66 @@ std::string VitalSigns::getTimestamp() const {
 
 std::string VitalSigns::generateTimestamp() const {
 
-    // --------------------------------------------------------
-    // Get current system time
-    // --------------------------------------------------------
-
     std::time_t currentTime =
         std::time(nullptr);
 
 
-    // --------------------------------------------------------
-    // Convert system time to local time
-    // --------------------------------------------------------
-
     std::tm* localTime =
-        std::localtime(&currentTime);
+        std::localtime(
+            &currentTime
+        );
 
 
-    // --------------------------------------------------------
-    // Check if conversion failed
-    // --------------------------------------------------------
-
-    if (localTime == nullptr) {
-
-        return "Unknown Time";
-    }
+    std::ostringstream oss;
 
 
-    // --------------------------------------------------------
-    // Create string stream for formatting
-    // --------------------------------------------------------
-
-    std::ostringstream stream;
-
-
-    // --------------------------------------------------------
-    // Format:
-    //
-    // YYYY-MM-DD HH:MM:SS
-    //
-    // Example:
-    // 2026-08-03 04:15:32
-    // --------------------------------------------------------
-
-    stream << std::put_time(
+    oss << std::put_time(
         localTime,
         "%Y-%m-%d %H:%M:%S"
     );
 
 
-    // Return formatted timestamp
-    return stream.str();
+    return oss.str();
 }
 
 
 // ============================================================
-// DISPLAY VITAL SIGNS
+// DISPLAY VITAL READING
 // ============================================================
 
 void VitalSigns::display() const {
 
     std::cout
-        << "\nTimestamp        : "
-        << timestamp
+        << "\n-----------------------------------------\n"
+        << "Patient ID       : "
+        << patientId
+        << "\n"
 
-        << "\nHeart Rate       : "
+        << "Heart Rate       : "
         << heartRate
-        << " bpm"
+        << " bpm\n"
 
-        << "\nSpO2             : "
+        << "SpO2             : "
         << spo2
-        << " %"
+        << " %\n"
 
-        << "\nTemperature      : "
-        << std::fixed
-        << std::setprecision(1)
+        << "Temperature      : "
         << temperature
-        << " C"
+        << " C\n"
 
-        << "\nBlood Pressure   : "
+        << "Blood Pressure   : "
         << systolicBP
         << "/"
         << diastolicBP
-        << " mmHg"
+        << " mmHg\n"
 
-        << "\nRespiratory Rate : "
+        << "Respiratory Rate : "
         << respiratoryRate
-        << " breaths/min"
+        << " breaths/min\n"
 
-        << "\n";
+        << "Timestamp        : "
+        << timestamp
+        << "\n"
+
+        << "-----------------------------------------\n";
 }

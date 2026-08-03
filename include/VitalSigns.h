@@ -9,17 +9,13 @@ class VitalSigns {
 private:
 
     int patientId;
-
     int heartRate;
-
     int spo2;
 
     double temperature;
 
     int systolicBP;
-
     int diastolicBP;
-
     int respiratoryRate;
 
     std::string timestamp;
@@ -27,7 +23,11 @@ private:
 
 public:
 
-    // Constructor
+    // ========================================================
+    // NEW VITAL READING
+    // Timestamp generated automatically
+    // ========================================================
+
     VitalSigns(
         int patientId,
         int heartRate,
@@ -39,7 +39,23 @@ public:
     );
 
 
-    // Getter functions
+    // ========================================================
+    // LOADED VITAL READING
+    // Existing timestamp restored from file
+    // ========================================================
+
+    VitalSigns(
+        int patientId,
+        int heartRate,
+        int spo2,
+        double temperature,
+        int systolicBP,
+        int diastolicBP,
+        int respiratoryRate,
+        const std::string& timestamp
+    );
+
+
     int getPatientId() const;
 
     int getHeartRate() const;
@@ -57,13 +73,11 @@ public:
     std::string getTimestamp() const;
 
 
-    // Display complete vital reading
     void display() const;
 
 
 private:
 
-    // Generate current date and time
     std::string generateTimestamp() const;
 };
 

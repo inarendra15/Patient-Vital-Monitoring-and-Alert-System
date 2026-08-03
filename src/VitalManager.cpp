@@ -3,94 +3,20 @@
 #include <iostream>
 
 
-// -------------------------------------------------
-// Validate Vital Signs
-// -------------------------------------------------
+// ============================================================
+// CONSTRUCTOR
+// ============================================================
 
-bool VitalManager::validateVitals(
-    int heartRate,
-    int spo2,
-    double temperature,
-    int systolicBP,
-    int diastolicBP,
-    int respiratoryRate
-) const {
+VitalManager::VitalManager() {
 
-    /*
-        These checks validate whether the entered
-        values are plausible input values.
-
-        They DO NOT determine whether the patient
-        is medically normal or abnormal.
-
-        Alert thresholds will be implemented
-        separately in Phase 3.
-    */
-
-
-    if (heartRate <= 0 || heartRate > 250) {
-
-        std::cout
-            << "Error: Invalid heart rate.\n";
-
-        return false;
-    }
-
-
-    if (spo2 <= 0 || spo2 > 100) {
-
-        std::cout
-            << "Error: Invalid SpO2 value.\n";
-
-        return false;
-    }
-
-
-    if (temperature < 25.0 || temperature > 45.0) {
-
-        std::cout
-            << "Error: Invalid temperature.\n";
-
-        return false;
-    }
-
-
-    if (systolicBP <= 0 || systolicBP > 300) {
-
-        std::cout
-            << "Error: Invalid systolic blood pressure.\n";
-
-        return false;
-    }
-
-
-    if (diastolicBP <= 0 || diastolicBP > 200) {
-
-        std::cout
-            << "Error: Invalid diastolic blood pressure.\n";
-
-        return false;
-    }
-
-
-    if (respiratoryRate <= 0 || respiratoryRate > 100) {
-
-        std::cout
-            << "Error: Invalid respiratory rate.\n";
-
-        return false;
-    }
-
-
-    return true;
 }
 
 
-// -------------------------------------------------
-// Record Vital Signs
-// -------------------------------------------------
+// ============================================================
+// RECORD NEW VITAL SIGNS
+// ============================================================
 
-bool VitalManager::recordVitals(
+void VitalManager::recordVitalSigns(
     int patientId,
     int heartRate,
     int spo2,
@@ -100,22 +26,7 @@ bool VitalManager::recordVitals(
     int respiratoryRate
 ) {
 
-    // Validate before storing
-    if (!validateVitals(
-            heartRate,
-            spo2,
-            temperature,
-            systolicBP,
-            diastolicBP,
-            respiratoryRate
-        )) {
-
-        return false;
-    }
-
-
-    // Create new reading
-    VitalSigns reading(
+    VitalSigns vital(
         patientId,
         heartRate,
         spo2,
@@ -126,21 +37,17 @@ bool VitalManager::recordVitals(
     );
 
 
-    // Store in vector
-    vitalRecords.push_back(reading);
+    vitalHistory.push_back(vital);
 
 
     std::cout
         << "\nVital signs recorded successfully.\n";
-
-
-    return true;
 }
 
 
-// -------------------------------------------------
-// Display Patient Vital History
-// -------------------------------------------------
+// ============================================================
+// DISPLAY PATIENT VITAL HISTORY
+// ============================================================
 
 void VitalManager::displayPatientHistory(
     int patientId
@@ -150,19 +57,16 @@ void VitalManager::displayPatientHistory(
 
 
     std::cout
-        << "\n=========================================\n"
-        << "        PATIENT VITAL HISTORY\n"
-        << "=========================================\n";
+        << "\n========================================\n"
+        << "          PATIENT VITAL HISTORY\n"
+        << "========================================\n";
 
 
-    for (const VitalSigns& reading : vitalRecords) {
+    for (const VitalSigns& vital : vitalHistory) {
 
-        if (reading.getPatientId() == patientId) {
+        if (vital.getPatientId() == patientId) {
 
-            reading.display();
-
-            std::cout
-                << "-----------------------------------------\n";
+            vital.display();
 
             found = true;
         }
@@ -172,35 +76,38 @@ void VitalManager::displayPatientHistory(
     if (!found) {
 
         std::cout
-            << "No vital records found for Patient ID "
+            << "\nNo vital history found for Patient ID: "
             << patientId
-            << ".\n";
+            << "\n";
     }
 }
 
-
-// -------------------------------------------------
-// Total Readings
-// -------------------------------------------------
-
-int VitalManager::getTotalReadings() const {
-
-    return static_cast<int>(
-        vitalRecords.size()
-    );
-}
 
 // ============================================================
 // GET LATEST VITAL READING
 // ============================================================
 
-const VitalSigns* VitalManager::getLatestReading() const {
+const VitalSigns*
+VitalManager::getLatestReading() const {
 
-    if (vitalRecords.empty()) {
+    if (vitalHistory.empty()) {
 
         return nullptr;
     }
 
 
-    return &vitalRecords.back();
+    return &vitalHistory.back();
+}
+
+
+// ============================================================
+// PHASE 4.2
+// LOAD EXISTING VITAL READING FROM PERSISTENT STORAGE
+// ============================================================
+
+void VitalManager::loadVitalSigns(
+    const VitalSigns& vital
+) {
+
+    vitalHistory.push_back(vital);
 }

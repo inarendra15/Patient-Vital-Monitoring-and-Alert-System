@@ -5,18 +5,18 @@
 
 #include <vector>
 
-
 class VitalManager {
 
 private:
-
-    std::vector<VitalSigns> vitalRecords;
-
+    // Stores all vital-sign readings in memory
+    std::vector<VitalSigns> vitalHistory;
 
 public:
+    // Constructor
+    VitalManager();
 
-    // Record new vital signs
-    bool recordVitals(
+    // Record a new vital-sign reading
+    void recordVitalSigns(
         int patientId,
         int heartRate,
         int spo2,
@@ -26,28 +26,15 @@ public:
         int respiratoryRate
     );
 
-
-    // Display complete history for a patient
+    // Display all vital readings belonging to a patient
     void displayPatientHistory(int patientId) const;
 
-
-    // Number of readings in the system
-    int getTotalReadings() const;
-
+    // Return the most recently stored vital reading
     const VitalSigns* getLatestReading() const;
 
-private:
-
-    // Validate physically plausible input ranges
-    bool validateVitals(
-        int heartRate,
-        int spo2,
-        double temperature,
-        int systolicBP,
-        int diastolicBP,
-        int respiratoryRate
-    ) const;
+    // Load a previously saved vital reading from file
+    // Used during application startup
+    void loadVitalSigns(const VitalSigns& vital);
 };
-
 
 #endif

@@ -137,3 +137,47 @@ int PatientManager::getPatientCount() const {
 
     return static_cast<int>(patients.size());
 }
+// ============================================================
+// GET LATEST REGISTERED PATIENT
+// ============================================================
+
+const Patient* PatientManager::getLatestPatient() const {
+
+    if (patients.empty()) {
+
+        return nullptr;
+    }
+
+    return &patients.back();
+}
+
+// ============================================================
+// LOAD PATIENT FROM PERSISTENT STORAGE
+// ============================================================
+
+void PatientManager::loadPatient(
+    const Patient& patient
+) {
+
+    patients.push_back(patient);
+
+
+    // --------------------------------------------------------
+    // Maintain ID continuity
+    //
+    // Example:
+    //
+    // Saved patients:
+    // 1001
+    // 1002
+    // 1003
+    //
+    // nextPatientId must become 1004
+    // --------------------------------------------------------
+
+    if (patient.getPatientId() >= nextPatientId) {
+
+        nextPatientId =
+            patient.getPatientId() + 1;
+    }
+}

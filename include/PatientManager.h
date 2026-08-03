@@ -3,8 +3,8 @@
 
 #include "Patient.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 
 class PatientManager {
@@ -28,13 +28,24 @@ public:
     );
 
 
-    Patient* searchPatient(int patientId);
+    Patient* searchPatient(
+        int patientId
+    );
 
 
     void displayAllPatients() const;
 
 
     int getPatientCount() const;
+
+
+    const Patient* getLatestPatient() const;
+
+
+    // Phase 4.2
+    void loadPatient(
+        const Patient& patient
+    );
 };
 
 

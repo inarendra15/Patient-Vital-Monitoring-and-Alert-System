@@ -1,10 +1,27 @@
 #include "../include/PatientManager.h"
 #include "../include/VitalManager.h"
 #include "../include/AlertEngine.h"
+#include "../include/FileManager.h"
 
 #include <iostream>
 #include <limits>
 #include <string>
+#include <vector>
+
+
+// ============================================================
+// CLEAR INVALID INPUT
+// ============================================================
+
+void clearInputBuffer() {
+
+    std::cin.clear();
+
+    std::cin.ignore(
+        std::numeric_limits<std::streamsize>::max(),
+        '\n'
+    );
+}
 
 
 // ============================================================
@@ -30,21 +47,71 @@ void displayMenu() {
 
 
 // ============================================================
-// MAIN FUNCTION
+// MAIN
 // ============================================================
 
 int main() {
 
-    // --------------------------------------------------------
-    // Managers
-    // --------------------------------------------------------
+    // ========================================================
+    // CREATE SYSTEM COMPONENTS
+    // ========================================================
 
     PatientManager patientManager;
+
     VitalManager vitalManager;
+
     AlertEngine alertEngine;
 
+    FileManager fileManager;
 
-    int choice;
+
+    // ========================================================
+    // PHASE 4.2
+    // RESTORE PERSISTENT DATA
+    // ========================================================
+
+    std::cout
+        << "\nLoading persistent data...\n";
+
+
+    // --------------------------------------------------------
+    // Load patients
+    // --------------------------------------------------------
+
+    std::vector<Patient> savedPatients =
+        fileManager.loadPatients();
+
+
+    for (const Patient& patient : savedPatients) {
+
+        patientManager.loadPatient(
+            patient
+        );
+    }
+
+
+    // --------------------------------------------------------
+    // Load previous vital readings
+    // --------------------------------------------------------
+
+    std::vector<VitalSigns> savedVitals =
+        fileManager.loadVitalSigns();
+
+
+    for (const VitalSigns& vital : savedVitals) {
+
+        vitalManager.loadVitalSigns(
+            vital
+        );
+    }
+
+
+    std::cout
+        << "Loaded "
+        << savedPatients.size()
+        << " patient(s) and "
+        << savedVitals.size()
+        << " vital reading(s).\n";
 
 
     // ========================================================
@@ -55,38 +122,31 @@ int main() {
 
         displayMenu();
 
-        std::cin >> choice;
+
+        int choice;
 
 
-        // ----------------------------------------------------
-        // Handle non-numeric menu input
-        // ----------------------------------------------------
-
-        if (std::cin.fail()) {
-
-            std::cin.clear();
-
-            std::cin.ignore(
-                std::numeric_limits<std::streamsize>::max(),
-                '\n'
-            );
+        if (!(std::cin >> choice)) {
 
             std::cout
                 << "\nInvalid input. Please enter a number.\n";
+
+            clearInputBuffer();
 
             continue;
         }
 
 
         // ====================================================
-        // MENU SELECTION
+        // PROCESS MENU
         // ====================================================
 
         switch (choice) {
 
 
         // ====================================================
-        // 1. REGISTER PATIENT
+        // OPTION 1
+        // REGISTER PATIENT
         // ====================================================
 
         case 1: {
@@ -97,15 +157,22 @@ int main() {
             int age;
 
 
-            // Remove leftover newline from input buffer
-            std::cin.ignore(
-                std::numeric_limits<std::streamsize>::max(),
-                '\n'
-            );
+            std::cout
+                << "\n=========================================\n"
+                << "          REGISTER PATIENT\n"
+                << "=========================================\n";
 
+
+            // Remove newline left by menu input
+            clearInputBuffer();
+
+
+            // ------------------------------------------------
+            // Name
+            // ------------------------------------------------
 
             std::cout
-                << "\nEnter patient name: ";
+                << "Enter Patient Name: ";
 
             std::getline(
                 std::cin,
@@ -113,43 +180,72 @@ int main() {
             );
 
 
-            std::cout
-                << "Enter age: ";
-
-            std::cin >> age;
-
-
-            // Validate numeric age input
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (name.empty()) {
 
                 std::cout
-                    << "\nError: Age must be a number.\n";
+                    << "\nError: Patient name cannot be empty.\n";
 
                 break;
             }
 
 
-            std::cin.ignore(
-                std::numeric_limits<std::streamsize>::max(),
-                '\n'
-            );
-
+            // ------------------------------------------------
+            // Age
+            // ------------------------------------------------
 
             std::cout
-                << "Enter gender: ";
+                << "Enter Age: ";
+
+
+            if (!(std::cin >> age)) {
+
+                std::cout
+                    << "\nError: Age must be numeric.\n";
+
+                clearInputBuffer();
+
+                break;
+            }
+
+
+            if (age <= 0 || age > 120) {
+
+                std::cout
+                    << "\nError: Age must be between "
+                    << "1 and 120.\n";
+
+                break;
+            }
+
+
+            clearInputBuffer();
+
+
+            // ------------------------------------------------
+            // Gender
+            // ------------------------------------------------
+
+            std::cout
+                << "Enter Gender: ";
 
             std::getline(
                 std::cin,
                 gender
             );
 
+
+            if (gender.empty()) {
+
+                std::cout
+                    << "\nError: Gender cannot be empty.\n";
+
+                break;
+            }
+
+
+            // =================================================
+            // ADD PATIENT TO MEMORY
+            // =================================================
 
             patientManager.addPatient(
                 name,
@@ -158,12 +254,55 @@ int main() {
             );
 
 
+            // =================================================
+            // GET NEWLY CREATED PATIENT
+            // =================================================
+
+            const Patient* newPatient =
+                patientManager.getLatestPatient();
+
+
+            if (newPatient == nullptr) {
+
+                std::cout
+                    << "\nError: Unable to retrieve "
+                    << "registered patient.\n";
+
+                break;
+            }
+
+
+            // =================================================
+            // SAVE PATIENT TO FILE
+            // =================================================
+
+            if (
+                fileManager.savePatient(
+                    *newPatient
+                )
+            ) {
+
+                std::cout
+                    << "Patient data saved to file.\n";
+
+            }
+
+            else {
+
+                std::cout
+                    << "\nWarning: Patient was registered "
+                    << "in memory but could not be saved "
+                    << "to file.\n";
+            }
+
+
             break;
         }
 
 
         // ====================================================
-        // 2. SEARCH PATIENT
+        // OPTION 2
+        // SEARCH PATIENT
         // ====================================================
 
         case 2: {
@@ -172,43 +311,40 @@ int main() {
 
 
             std::cout
-                << "\nEnter Patient ID: ";
+                << "\n=========================================\n"
+                << "           SEARCH PATIENT\n"
+                << "=========================================\n"
+                << "Enter Patient ID: ";
 
-            std::cin >> patientId;
 
-
-            // Validate input
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> patientId)) {
 
                 std::cout
                     << "\nError: Patient ID must be numeric.\n";
+
+                clearInputBuffer();
 
                 break;
             }
 
 
-            // Search patient
             Patient* patient =
-                patientManager.searchPatient(patientId);
+                patientManager.searchPatient(
+                    patientId
+                );
 
 
             if (patient != nullptr) {
 
                 std::cout
                     << "\nPatient Found\n"
-                    << "----------------------------------------------------------\n";
-
+                    << "-----------------------------------------\n";
 
                 patient->display();
 
-            } else {
+            }
+
+            else {
 
                 std::cout
                     << "\nPatient not found.\n";
@@ -220,7 +356,8 @@ int main() {
 
 
         // ====================================================
-        // 3. DISPLAY ALL PATIENTS
+        // OPTION 3
+        // DISPLAY ALL PATIENTS
         // ====================================================
 
         case 3: {
@@ -232,7 +369,8 @@ int main() {
 
 
         // ====================================================
-        // 4. RECORD VITAL SIGNS
+        // OPTION 4
+        // RECORD VITAL SIGNS
         // ====================================================
 
         case 4: {
@@ -250,27 +388,26 @@ int main() {
             int respiratoryRate;
 
 
+            std::cout
+                << "\n=========================================\n"
+                << "          RECORD VITAL SIGNS\n"
+                << "=========================================\n";
+
+
             // ------------------------------------------------
-            // Get Patient ID
+            // Patient ID
             // ------------------------------------------------
 
             std::cout
-                << "\nEnter Patient ID: ";
-
-            std::cin >> patientId;
+                << "Enter Patient ID: ";
 
 
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> patientId)) {
 
                 std::cout
                     << "\nError: Invalid Patient ID.\n";
+
+                clearInputBuffer();
 
                 break;
             }
@@ -281,13 +418,16 @@ int main() {
             // ------------------------------------------------
 
             Patient* patient =
-                patientManager.searchPatient(patientId);
+                patientManager.searchPatient(
+                    patientId
+                );
 
 
             if (patient == nullptr) {
 
                 std::cout
-                    << "\nError: Patient ID does not exist.\n";
+                    << "\nError: Patient ID does not exist.\n"
+                    << "Register the patient first.\n";
 
                 break;
             }
@@ -306,20 +446,13 @@ int main() {
             std::cout
                 << "Enter Heart Rate (bpm): ";
 
-            std::cin >> heartRate;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> heartRate)) {
 
                 std::cout
-                    << "\nError: Invalid heart rate input.\n";
+                    << "\nError: Invalid heart rate.\n";
+
+                clearInputBuffer();
 
                 break;
             }
@@ -332,20 +465,13 @@ int main() {
             std::cout
                 << "Enter SpO2 (%): ";
 
-            std::cin >> spo2;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> spo2)) {
 
                 std::cout
-                    << "\nError: Invalid SpO2 input.\n";
+                    << "\nError: Invalid SpO2.\n";
+
+                clearInputBuffer();
 
                 break;
             }
@@ -358,72 +484,51 @@ int main() {
             std::cout
                 << "Enter Temperature (C): ";
 
-            std::cin >> temperature;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> temperature)) {
 
                 std::cout
-                    << "\nError: Invalid temperature input.\n";
+                    << "\nError: Invalid temperature.\n";
+
+                clearInputBuffer();
 
                 break;
             }
 
 
             // ------------------------------------------------
-            // Systolic Blood Pressure
+            // Systolic BP
             // ------------------------------------------------
 
             std::cout
                 << "Enter Systolic BP (mmHg): ";
 
-            std::cin >> systolicBP;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> systolicBP)) {
 
                 std::cout
-                    << "\nError: Invalid systolic BP input.\n";
+                    << "\nError: Invalid systolic BP.\n";
+
+                clearInputBuffer();
 
                 break;
             }
 
 
             // ------------------------------------------------
-            // Diastolic Blood Pressure
+            // Diastolic BP
             // ------------------------------------------------
 
             std::cout
                 << "Enter Diastolic BP (mmHg): ";
 
-            std::cin >> diastolicBP;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> diastolicBP)) {
 
                 std::cout
-                    << "\nError: Invalid diastolic BP input.\n";
+                    << "\nError: Invalid diastolic BP.\n";
+
+                clearInputBuffer();
 
                 break;
             }
@@ -436,105 +541,151 @@ int main() {
             std::cout
                 << "Enter Respiratory Rate (breaths/min): ";
 
-            std::cin >> respiratoryRate;
 
-
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> respiratoryRate)) {
 
                 std::cout
-                    << "\nError: Invalid respiratory rate input.\n";
+                    << "\nError: Invalid respiratory rate.\n";
+
+                clearInputBuffer();
 
                 break;
             }
 
 
-            // ------------------------------------------------
-            // Store Vital Reading
-            // ------------------------------------------------
+            // =================================================
+            // STORE NEW READING IN MEMORY
+            //
+            // IMPORTANT:
+            // recordVitalSigns() returns void.
+            // Therefore we DO NOT assign it to a bool.
+            // =================================================
 
-            bool recorded =
-            vitalManager.recordVitals(
-            patientId,
-            heartRate,
-            spo2,
-            temperature,
-            systolicBP,
-            diastolicBP,
-            respiratoryRate
-        );
-
-
-        if (!recorded) {
-
-            break;
-        }
-
-
-        // ============================================================
-        // GET THE NEWLY STORED READING
-        // ============================================================
-
-        const VitalSigns* latestReading =
-            vitalManager.getLatestReading();
-
-
-        if (latestReading == nullptr) {
-
-            std::cout
-                << "\nError: Unable to retrieve vital reading.\n";
-
-            break;
-        }
-    
-
-
-        // ============================================================
-        // RUN RULE-BASED ALERT ENGINE
-        // ============================================================
-
-        std::vector<Alert> alerts =
-            alertEngine.evaluate(
-                *latestReading
+            vitalManager.recordVitalSigns(
+                patientId,
+                heartRate,
+                spo2,
+                temperature,
+                systolicBP,
+                diastolicBP,
+                respiratoryRate
             );
 
 
-        // ============================================================
-        // DISPLAY RESULT
-        // ============================================================
+            // =================================================
+            // RETRIEVE NEW READING
+            // =================================================
 
-        if (alerts.empty()) {
-
-            std::cout
-                << "\n[STATUS: NORMAL]\n"
-                << "All monitored vital signs are within "
-                << "configured thresholds.\n";
-
-        } else {
-
-            std::cout
-                << "\n=========================================\n"
-                << "             ALERTS GENERATED\n"
-                << "=========================================\n";
+            const VitalSigns* latestReading =
+                vitalManager.getLatestReading();
 
 
-            for (const Alert& alert : alerts) {
+            if (latestReading == nullptr) {
 
-                alert.display();
+                std::cout
+                    << "\nError: Unable to retrieve "
+                    << "the recorded vital reading.\n";
+
+                break;
             }
-        }
-        break;
+
+
+            // =================================================
+            // PERSIST VITAL READING
+            // =================================================
+
+            if (
+                fileManager.saveVitalSigns(
+                    *latestReading
+                )
+            ) {
+
+                std::cout
+                    << "Vital reading saved to file.\n";
+
+            }
+
+            else {
+
+                std::cout
+                    << "\nWarning: Vital reading exists "
+                    << "in memory but could not be "
+                    << "saved to file.\n";
+            }
+
+
+            // =================================================
+            // RUN RULE-BASED ALERT ENGINE
+            // =================================================
+
+            std::vector<Alert> alerts =
+                alertEngine.evaluate(
+                    *latestReading
+                );
+
+
+            // =================================================
+            // NORMAL READING
+            // =================================================
+
+            if (alerts.empty()) {
+
+                std::cout
+                    << "\n=========================================\n"
+                    << "              STATUS: NORMAL\n"
+                    << "=========================================\n"
+                    << "All monitored vital signs are within "
+                    << "configured thresholds.\n";
+            }
+
+
+            // =================================================
+            // ABNORMAL READING
+            // =================================================
+
+            else {
+
+                std::cout
+                    << "\n=========================================\n"
+                    << "             ALERTS GENERATED\n"
+                    << "=========================================\n";
+
+
+                for (const Alert& alert : alerts) {
+
+                    // Display alert on console
+                    alert.display();
+
+
+                    // -----------------------------------------
+                    // Persist abnormal event
+                    // -----------------------------------------
+
+                    if (
+                        !fileManager.saveAlert(
+                            alert
+                        )
+                    ) {
+
+                        std::cout
+                            << "\nWarning: Alert could not "
+                            << "be written to the alert log.\n";
+                    }
+                }
+
+
+                std::cout
+                    << "\nAbnormal event(s) logged to file.\n";
+            }
+
+
+            break;
         }
 
 
         // ====================================================
-        // 5. VIEW PATIENT VITAL HISTORY
+        // OPTION 5
+        // VIEW PATIENT VITAL HISTORY
         // ====================================================
 
         case 5: {
@@ -543,40 +694,33 @@ int main() {
 
 
             std::cout
-                << "\nEnter Patient ID: ";
+                << "\n=========================================\n"
+                << "       PATIENT VITAL HISTORY\n"
+                << "=========================================\n"
+                << "Enter Patient ID: ";
 
-            std::cin >> patientId;
 
-
-            // Validate input
-            if (std::cin.fail()) {
-
-                std::cin.clear();
-
-                std::cin.ignore(
-                    std::numeric_limits<std::streamsize>::max(),
-                    '\n'
-                );
+            if (!(std::cin >> patientId)) {
 
                 std::cout
                     << "\nError: Invalid Patient ID.\n";
+
+                clearInputBuffer();
 
                 break;
             }
 
 
-            // ------------------------------------------------
-            // Check whether patient exists
-            // ------------------------------------------------
-
             Patient* patient =
-                patientManager.searchPatient(patientId);
+                patientManager.searchPatient(
+                    patientId
+                );
 
 
             if (patient == nullptr) {
 
                 std::cout
-                    << "\nError: Patient ID does not exist.\n";
+                    << "\nPatient not found.\n";
 
                 break;
             }
@@ -588,10 +732,6 @@ int main() {
                 << "\n";
 
 
-            // ------------------------------------------------
-            // Display patient's historical vital records
-            // ------------------------------------------------
-
             vitalManager.displayPatientHistory(
                 patientId
             );
@@ -600,9 +740,12 @@ int main() {
             break;
         }
 
-        //-----------------------------------
-        //Alert engine
-        //-------------------------------------
+
+        // ====================================================
+        // OPTION 6
+        // DISPLAY THRESHOLD CONFIGURATION
+        // ====================================================
+
         case 6: {
 
             alertEngine.displayThresholds();
@@ -610,34 +753,43 @@ int main() {
             break;
         }
 
+
         // ====================================================
-        // 6. EXIT
+        // OPTION 7
+        // EXIT
         // ====================================================
 
         case 7: {
 
             std::cout
-                << "\nExiting Patient Monitoring System...\n";
+                << "\n=========================================\n"
+                << "   PATIENT VITAL MONITORING SYSTEM\n"
+                << "=========================================\n"
+                << "Exiting application...\n"
+                << "Persistent data has been saved.\n"
+                << "=========================================\n";
+
 
             return 0;
         }
 
 
         // ====================================================
-        // INVALID MENU OPTION
+        // INVALID OPTION
         // ====================================================
 
         default: {
 
             std::cout
-                << "\nInvalid choice. Please select between 1 and 7.\n";
+                << "\nInvalid choice. "
+                << "Please select between 1 and 7.\n";
 
             break;
         }
 
-        } // end switch
+        } // switch
 
-    } // end while
+    } // while
 
 
     return 0;
