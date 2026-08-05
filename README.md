@@ -287,7 +287,7 @@ src/EmergencyStatistics.cpp \
 src/ReportManager.cpp \
 -o patient_monitor
 ```
-
+"g++ -std=c++17 src/main.cpp src/Patient.cpp src/PatientManager.cpp src/VitalSigns.cpp src/VitalManager.cpp src/ThresholdConfig.cpp src/Alert.cpp src/AlertEngine.cpp src/FileManager.cpp src/AnalyticsManager.cpp src/PriorityManager.cpp src/EmergencyManager.cpp src/EmergencyStatistics.cpp src/ReportManager.cpp -o patient_monitor"
 ---
 
 # ▶ Run
